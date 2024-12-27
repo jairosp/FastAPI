@@ -25,7 +25,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 def get_user(id: int, db: Session = Depends(get_db)):
     statement = select(models.User).filter(models.User.id == id)
     results = db.exec(statement)
-    user = results.one()
+    user = results.one_or_none()
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
