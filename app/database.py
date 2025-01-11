@@ -1,13 +1,12 @@
 from sqlmodel import SQLModel, create_engine, Session
-  # Import your models here
+from .config import settings
 
-# Define the database URL
-DATABASE_URL = "postgresql://postgres:kasparovsabe@localhost:5432/postgres"
 
-# Create the database engine
+DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
+
+
 engine = create_engine(DATABASE_URL)
 
-# Function to create tables
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
   

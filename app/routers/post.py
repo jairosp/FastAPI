@@ -10,14 +10,14 @@ router = APIRouter(
 )
 
 @router.get('/', response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    statement = select(models.Post)
+def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0):
+    statement = select(models.Post).limit(limit).offset(skip)
     posts = db.exec(statement).all()
     return posts
 
 @router.post("/", status_code = status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    new_post = models.Post(**post.model_dump())
+    new_post = models.Post(owner_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -42,6 +42,8 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
 
     if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"post with id = {id} does not exist")
+    if current_user.id != post.owner_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
     
     db.delete(post)
     db.commit()
@@ -49,7 +51,7 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
     return {"message": "post was succesfully deleted"}
 
 @router.put("/{id}")
-def update_post(id: int, post_data: schemas.PostCreate, db: Session = Depends(get_db)):
+def update_post(id: int, post_data: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # Fetch the existing post
     statement = select(models.Post).where(models.Post.id == id)
     result = db.exec(statement)
@@ -60,6 +62,8 @@ def update_post(id: int, post_data: schemas.PostCreate, db: Session = Depends(ge
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id = {id} does not exist"
         )
+    if current_user.id != existing_post.owner_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
     
     # Update the fields dynamically
     for key, value in post_data.model_dump().items():
