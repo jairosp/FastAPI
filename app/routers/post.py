@@ -1,19 +1,27 @@
 from .. import models, schemas, oauth2
 from typing import List
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from ..database import get_db
 
 router = APIRouter(
     prefix="/posts",
     tags=["Post"]
 )
+@router.get("/", response_model=List[schemas.Post])
+def get_posts(
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+    limit: int = 10,
+    skip: int = 0
+):
+    statement = select(models.Post)
+    query = db.exec(statement)
+    results = query.all()
 
-@router.get('/', response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0):
-    statement = select(models.Post).limit(limit).offset(skip)
-    posts = db.exec(statement).all()
-    return posts
+    return results
+
+
 
 @router.post("/", status_code = status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):

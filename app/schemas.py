@@ -14,6 +14,7 @@ class PostCreate(PostBase):
 class PostUpdate(PostBase):
     pass
 
+
 class UserOut(BaseModel):
     id: int
     email: EmailStr
@@ -28,6 +29,13 @@ class Post(PostBase):
     created_at: datetime
     owner_id: int
     owner: UserOut
+
+    class Config:
+        from_attributes = True
+
+class PostOut(PostBase):
+    Post: Post
+    votes: int
 
     class Config:
         from_attributes = True
