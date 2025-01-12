@@ -28,13 +28,13 @@ class Post(PostBase):
     id: int
     created_at: datetime
     owner_id: int
-    owner: UserOut | None
+    owner: UserOut
 
     class Config:
         from_attributes = True
 
 class PostOut(BaseModel):
-    Post: Post
+    post: Post
     votes: int
 
     class Config:

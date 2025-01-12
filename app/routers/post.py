@@ -10,19 +10,33 @@ router = APIRouter(
 )
 
 # DEBUG THIS
-# @router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.PostOut])
-@router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.Post])
+@router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.PostOut])
+# @router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.Post])
+# @router.get("/", status_code=status.HTTP_200_OK)
 def get_posts(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
     limit: int = 10,
-    skip: int = 0
+    skip: int = 0,
+    search: str = ""
 ):
-    # statement = select(models.Post, func.count(models.Vote.post_id).label("Votes")).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id)
-    statement = select(models.Post)
-    query = db.exec(statement)
-    results = query.all()
+    statement = select(models.Post, func.count(models.Vote.post_id).label("votes"))\
+                        .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)\
+                        .group_by(models.Post.id)\
+                        .filter(models.Post.title.contains(search))\
+                        .limit(limit)\
+                        .offset(skip)
+    
+    results = db.exec(statement).all()
 
+    for idx, row in enumerate(results):
+        post, votes = row
+
+        userout = schemas.UserOut(**post.owner.model_dump())
+        new_post = schemas.Post(**post.model_dump(), owner=userout)
+        post_out = schemas.PostOut(post = new_post, votes = votes)
+
+        results[idx] = post_out
     # results = list(map(lambda x : x._mapping, results)) # This is line is given by a Youtube comment to fix this issue
     return results
 
