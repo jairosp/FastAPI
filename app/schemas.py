@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, conint
 from typing import Optional
- 
+    
 
 class PostBase(BaseModel):
     title: str
@@ -28,12 +28,12 @@ class Post(PostBase):
     id: int
     created_at: datetime
     owner_id: int
-    owner: UserOut
+    owner: UserOut | None
 
     class Config:
         from_attributes = True
 
-class PostOut(PostBase):
+class PostOut(BaseModel):
     Post: Post
     votes: int
 

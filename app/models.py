@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import List, Optional
 
 
+
 class User(SQLModel, table = True):
     __tablename__ = "users"
     id: int = Field(nullable=False, primary_key = True)

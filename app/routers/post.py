@@ -8,19 +8,23 @@ router = APIRouter(
     prefix="/posts",
     tags=["Post"]
 )
-@router.get("/", response_model=List[schemas.Post])
+
+# DEBUG THIS
+# @router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.PostOut])
+@router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.Post])
 def get_posts(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
     limit: int = 10,
     skip: int = 0
 ):
+    # statement = select(models.Post, func.count(models.Vote.post_id).label("Votes")).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id)
     statement = select(models.Post)
     query = db.exec(statement)
     results = query.all()
 
+    # results = list(map(lambda x : x._mapping, results)) # This is line is given by a Youtube comment to fix this issue
     return results
-
 
 
 @router.post("/", status_code = status.HTTP_201_CREATED, response_model=schemas.Post)

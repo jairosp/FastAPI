@@ -7,8 +7,9 @@ DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_pa
 
 engine = create_engine(DATABASE_URL)
 
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
+# NO LONGER NEEDED BECAUSE OF ALEMBIC !!!
+# def create_db_and_tables():
+#     SQLModel.metadata.create_all(engine)
   
 def get_db():   
     with Session(engine) as session:
