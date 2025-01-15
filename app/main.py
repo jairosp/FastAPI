@@ -5,7 +5,6 @@ from .config import settings
 
 from fastapi.middleware.cors import CORSMiddleware
 
-
 # create_db_and_tables() NO LONGER NEEDED DUE TO ALEMBIC USAGE
 
 app = FastAPI()

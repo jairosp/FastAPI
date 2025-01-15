@@ -9,10 +9,8 @@ router = APIRouter(
     tags=["Post"]
 )
 
-# DEBUG THIS
+
 @router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.PostOut])
-# @router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.Post])
-# @router.get("/", status_code=status.HTTP_200_OK)
 def get_posts(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
@@ -37,7 +35,6 @@ def get_posts(
         post_out = schemas.PostOut(post = new_post, votes = votes)
 
         results[idx] = post_out
-    # results = list(map(lambda x : x._mapping, results)) # This is line is given by a Youtube comment to fix this issue
     return results
 
 
