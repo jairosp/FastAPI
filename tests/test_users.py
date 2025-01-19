@@ -1,21 +1,10 @@
 from app import schemas
 from jose import jwt
-from .database import client, session
+from .conftest import client, session
 import pytest
 from app.config import settings
 
-@pytest.fixture
-def test_user(client):
-    user_data = {"email": "he@email.com", "password": "password123"}
-    res = client.post(
-        "/users/", json=user_data)
-    
-    new_user = res.json()
-    new_user['password'] = user_data['password']
 
-    assert res.status_code == 201
-
-    return new_user
 
 def test_create_user(client):
     res = client.post(
@@ -37,3 +26,13 @@ def test_login_user(client, test_user):
     assert login_res.token_type == "bearer"
     assert res.status_code == 200
     
+@pytest.mark.parametrize("email, password, status_code", [
+    ('wrongemail@gmail.com', 'password123', 403),
+    ('he@gmail.com', 'wrong_password', 403),
+    ('wrongemail@email.com', 'wrong_password', 403),
+    (None, 'password123', 403),
+    ('wrongemail@email.com', None, 403)
+])
+def test_incorrect_login(test_user, client, email, password, status_code):
+    res = client.post("/login", data = {"username": email, "password": password})
+    assert res.status_code == status_code
