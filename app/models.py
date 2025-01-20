@@ -10,7 +10,7 @@ class User(SQLModel, table = True):
     id: int = Field(nullable=False, primary_key = True)
     email: str = Field(nullable=False, unique=True)
     password: str = Field(nullable=False)
-    created_at: datetime | None =  Field(default_factory=None  ,
+    created_at: datetime =  Field(default_factory=None  ,
                                   sa_column_kwargs={"server_default": text("NOW()")},
                                   nullable=False)
 

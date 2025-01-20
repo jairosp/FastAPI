@@ -1,9 +1,9 @@
-from .. import models, schemas, oauth2
+from app import models, schemas, oauth2
 from typing import List
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlmodel import Session, select, func
-from ..database import get_db
-
+from app.database import get_db
+    
 router = APIRouter(
     prefix="/posts",
     tags=["Post"]
